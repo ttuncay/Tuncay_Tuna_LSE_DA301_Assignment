@@ -21,7 +21,11 @@ age vs loyalty:
 •	R-squared value is 0.2% meaning that dependent variable simply cannot be expolained by this independent variable. 
 •	Coefficient value is -4.01, meaning that each additional age decreases loyalty by -4. 
 
+Week 2:
 
+Worked on clustering the data based on renumeration and spending score. For the sake of the model, reimported data as a new data frame and crosschecked the data. To determine the k-values, applied elbow and silhouette methods. 
 
+Silhouette method clearly suggested k value as 5. Whereas elbow method made me think of values 5-7. 
 
-![Uploading image.png…]()
+When I visually inspect the data by eye, it is obvious there are 5 clusters. However, 2 outlier groups can also be considered as separate clusters. Therefore, I prefer to move forward with 7 clusters.
+
