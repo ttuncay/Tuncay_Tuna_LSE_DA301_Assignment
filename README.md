@@ -29,3 +29,26 @@ Silhouette method clearly suggested k value as 5. Whereas elbow method made me t
 
 When I visually inspect the data by eye, it is obvious there are 5 clusters. However, 2 outlier groups can also be considered as separate clusters. Therefore, I prefer to move forward with 7 clusters.
 
+Week 3:
+
+Worked on sentiment analysis using NLP capabilities of Python. Constructed word cloud to identify what people mention the most in their reviews and summaries. 
+
+Summary:
+•	Great, fun, five stars are the most visible ones in summary word cloud. Those can also be proof checked by word counter. Those words are in top 5 in terms of usage frequency in summary.
+•	Polarity identified for each summary provided. Compound polarity is 0.22 which indicates sentiment is on positive side. This also sense checks the outcome of word cloud and frequently used words.
+
+Review: 
+•	Like summary, word cloud is created for reviews also. Game, play, great, like are most visible words. Word counter indicates similar results. 
+•	Polarity for review is slightly lower than summary but it is still positive and 0.21.
+
+To get better understanding and check how sentiment analysis working, I listed top 20 positive and negative sentiment for review and summary.
+
+Review:
+•	In general, negative sentiments for reviews indicates how hard to understand directions and somehow the game is boring. However, once the negative sentiment gets closer to neutral, I would say comments are rather positive than negative. I think there is still chance to improve the model. 
+•	Positive sentiment reviews (I viewed only top 20, and all has perfect positive sentiment of 1) suggest the game is awesome, it is fun, best gift ever etc. It looks like positive sentiment analysis works better than negative sentiment analysis for reviews.
+
+Summary: 
+•	Negative sentiments focus on how boring the game is and how disappointed they are. Top 20 negative sentiment on summary all makes sense and model looks working well. In here, comments are usually single word comments therefore it is much easier for the model to apply sentiment analysis and it is much accurate.
+•	Positive sentiments again like reviews are combination of comments with polarity 1.  short and concise comments enable model to identify positive sentiment with good accuracy.
+
+
