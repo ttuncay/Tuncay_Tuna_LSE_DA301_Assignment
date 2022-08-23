@@ -51,4 +51,11 @@ Summary:
 •	Negative sentiments focus on how boring the game is and how disappointed they are. Top 20 negative sentiment on summary all makes sense and model looks working well. In here, comments are usually single word comments therefore it is much easier for the model to apply sentiment analysis and it is much accurate.
 •	Positive sentiments again like reviews are combination of comments with polarity 1.  short and concise comments enable model to identify positive sentiment with good accuracy.
 
+Week 4:
+
+Started exploring turtle_sales data using R. After importing the data as a dataframe sense check the data. There were no missing values. Product column was defined whereas it indicated product ID. Converted into factor to eliminate aggregation.
+
+Experimented multiple plots to sense check the data. Original data is in Product code/ID level. Therefore, histogram and box plot did not make sense much due to duplicate sales of products. Scatter plot indicates there is a positive correlation between global sales with others as expected. 
+
+Grouped the data on products to eliminate duplicated sales on products. Created a summary df with sum of sales in regions. Histogram and box plot helped to identify outliers in the data. However due to too many distinct products (169), grouping did not help much to summarize the data, I tried grouping by platform and at least by this way I managed to group sales in 22 categories.  
 
