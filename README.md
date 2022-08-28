@@ -59,3 +59,13 @@ Experimented multiple plots to sense check the data. Original data is in Product
 
 Grouped the data on products to eliminate duplicated sales on products. Created a summary df with sum of sales in regions. Histogram and box plot helped to identify outliers in the data. However due to too many distinct products (169), grouping did not help much to summarize the data, I tried grouping by platform and at least by this way I managed to group sales in 22 categories.  
 
+Week 4:
+
+Further explored turtle sales with R. Sense checked data and prepared the summary descriptive statistics. 
+
+Sales numbers are not forming a normally distributed data. This has been proved with several tests including q-q plots and Shapiro-Wilk test. In addition, skewness and kurtosis of the data suggests the same. This is same for EU, NA and Global sales.  All of them are highly positively skewed.
+
+Although data is not normally distributed, Pearson correlation is checked in analysis. Although data suggests sales numbers are positively correlated among each other, this analysis may not be correct. 
+
+To further explore, I created scatter plots among sales data. One can also see that sales numbers are positively correlated with each other.
+
