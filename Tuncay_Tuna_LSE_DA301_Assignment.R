@@ -118,6 +118,13 @@ qplot(EU_Sales, data=turtle_sales3, geom='boxplot')
 qplot(Global_Sales, data=turtle_sales3, geom='boxplot')
 qplot(NA_Sales, data=turtle_sales3, geom='boxplot')
 
+# Histogram and boxplot does not give correct understanding due to recurring items. 
+# Example: Products repeat itself in different columns due to sales in different platforms.
+filter(turtle_sales, Product==978)
+turtle_sales %>% count(Product)
+
+# Therefore better to group df in product, sum sales and create visuals once again.
+
 ###############################################################################
 
 # 3. Determine the impact on sales per product_id.
@@ -129,7 +136,8 @@ library(dplyr)
 
 # Group data based on Product and determine the sum per Product.
 turtle_grp_product <- turtle_sales3 %>% group_by(Product) %>%
-  summarise(Total_EU_Sales = sum(EU_Sales),
+  summarise(count = n(),
+            Total_EU_Sales = sum(EU_Sales),
             Total_NA_Sales = sum(NA_Sales),
             Total_Global_Sales = sum(Global_Sales),
             .groups = 'drop')
@@ -143,7 +151,8 @@ view(turtle_grp_product)
 
 # Group data based on Platform and determine the sum per Platform
 turtle_grp_platform <- turtle_sales3 %>% group_by(Platform) %>%
-  summarise(Total_EU_Sales = sum(EU_Sales),
+  summarise(count= n(),
+            Total_EU_Sales = sum(EU_Sales),
             Total_NA_Sales = sum(NA_Sales),
             Total_Global_Sales = sum(Global_Sales),
             .groups = 'drop')
@@ -212,13 +221,28 @@ qplot(Total_NA_Sales, data=turtle_grp_product, geom='boxplot')
 # 1. Load and explore the data
 
 # View data frame created in Week 4.
-
+view(turtle_sales3)
+head(turtle_sales3)
+str(turtle_sales3)
 
 # Check output: Determine the min, max, and mean values.
+# NA_Sales
+min(turtle_sales3$NA_Sales)
+max(turtle_sales3$NA_Sales)
+mean(turtle_sales3$NA_Sales)
 
+# EU_Sales
+min(turtle_sales3$EU_Sales)
+max(turtle_sales3$EU_Sales)
+mean(turtle_sales3$EU_Sales)
+
+# Global_Sales
+min(turtle_sales3$Global_Sales)
+max(turtle_sales3$Global_Sales)
+mean(turtle_sales3$Global_Sales)
 
 # View the descriptive statistics.
-
+summary(turtle_sales3)
 
 ###############################################################################
 
@@ -227,31 +251,113 @@ qplot(Total_NA_Sales, data=turtle_grp_product, geom='boxplot')
 ## 2a) Create Q-Q Plots
 # Create Q-Q Plots.
 
+# NA_Sales
+qqnorm(turtle_sales3$NA_Sales)
+qqline(turtle_sales3$NA_Sales)
 
+# EU_Sales
+qqnorm(turtle_sales3$EU_Sales)
+qqline(turtle_sales3$EU_Sales)
+
+# Global_Sales
+qqnorm(turtle_sales3$Global_Sales)
+qqline(turtle_sales3$Global_Sales)
+
+## Q-Q plots suggests data is not normally distributed. 
+## Let's explore further with Shapiro-Wilk test
 
 ## 2b) Perform Shapiro-Wilk test
 # Install and import Moments.
-
+library(moments)
 
 # Perform Shapiro-Wilk test.
+# Null hyptohesis: Data is normally distributed.
+# Alternate hypothesis: Data is not normally distributed. 
 
+# NA_Sales
+shapiro.test(turtle_sales3$NA_Sales)
+# p value (p-value < 2.2e-16) way lower than significance level.
+# There is not enough evidence to disprove alternate hypothesis. 
+# Null hypothesis can be rejected.
+
+# EU_Sales
+shapiro.test(turtle_sales3$EU_Sales)
+# p value (p-value < 2.2e-16) way lower than significance level.
+# There is not enough evidence to disprove alternate hypothesis. 
+# Null hypothesis can be rejected.
+
+# Global_Sales
+shapiro.test(turtle_sales3$Global_Sales)
+# p value (p-value < 2.2e-16) way lower than significance level.
+# There is not enough evidence to disprove alternate hypothesis. 
+# Null hypothesis can be rejected.
 
 
 ## 2c) Determine Skewness and Kurtosis
 # Skewness and Kurtosis.
 
+# NA_Sales
+skewness(turtle_sales3$NA_Sales)
+kurtosis(turtle_sales3$NA_Sales)
+# Skewness value (3.06) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (31.37) greater than 3 indicated leptokurtic (heavy tailed)
 
+# EU_Sales
+skewness(turtle_sales3$EU_Sales)
+kurtosis(turtle_sales3$EU_Sales)
+# Skewness value (4.81) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (44.69) greater than 3 indicated leptokurtic (heavy tailed)
+
+# Global_Sales
+skewness(turtle_sales3$Global_Sales)
+kurtosis(turtle_sales3$Global_Sales)
+# Skewness value (4.04) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (32.64) greater than 3 indicated leptokurtic (heavy tailed)
 
 ## 2d) Determine correlation
 # Determine correlation.
 
+# Create new df with only sales data (numeric variables)
+cor_df <-select(turtle_sales3, -Product, -Platform)
+head(cor_df)
 
+# Determine correlation among variable
+cor(cor_df)
+
+# Table suggest sales data among themselves are positively correlated. Which is expected.
+# However is this the correct approach? Data is not normally distributed, can I still check correlation between variables?
 ###############################################################################
 
 # 3. Plot the data
 # Create plots to gain insights into data.
 
+ggplot(turtle_sales3, aes(x=EU_Sales, y=Global_Sales)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title ='Correlation between EU Sales and Global Sales',
+       subtitle = 'Scatter Plot for EU Sales vs Global Sales',
+       x = 'EU Sales',
+       y = 'Global Sales') +
+  theme_minimal()
 
+ggplot(turtle_sales3, aes(x=NA_Sales, y=Global_Sales)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title ='Correlation between North America Sales and Global Sales',
+       subtitle = 'Scatter Plot for North America Sales vs Global Sales',
+       x = 'North America Sales',
+       y = 'Global Sales') +
+  theme_minimal()
+
+ggplot(turtle_sales3, aes(x=NA_Sales, y=EU_Sales)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title ='Correlation between North America Sales and EU Sales',
+       subtitle = 'Scatter Plot for North America Sales vs EU Sales',
+       x = 'North America Sales',
+       y = 'EU Sales') +
+  theme_minimal()
+ 
 ###############################################################################
 
 # 4. Observations and insights
