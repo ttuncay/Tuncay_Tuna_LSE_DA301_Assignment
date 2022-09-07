@@ -59,7 +59,7 @@ Experimented multiple plots to sense check the data. Original data is in Product
 
 Grouped the data on products to eliminate duplicated sales on products. Created a summary df with sum of sales in regions. Histogram and box plot helped to identify outliers in the data. However due to too many distinct products (169), grouping did not help much to summarize the data, I tried grouping by platform and at least by this way I managed to group sales in 22 categories.  
 
-Week 4:
+Week 5:
 
 Further explored turtle sales with R. Sense checked data and prepared the summary descriptive statistics. 
 
@@ -68,4 +68,19 @@ Sales numbers are not forming a normally distributed data. This has been proved 
 Although data is not normally distributed, Pearson correlation is checked in analysis. Although data suggests sales numbers are positively correlated among each other, this analysis may not be correct. 
 
 To further explore, I created scatter plots among sales data. One can also see that sales numbers are positively correlated with each other.
+
+Week 6: 
+
+This week worked on predictive analytics with R. By the help of linear regression models, managed to predict Global sales based on EU and NA sales.
+
+Simple linear regression models delivered poor fit. In addition, R-squared values, which is the metric shows how successful is the model to predict dependent variable based on provided independent variable, way lower than 50%.
+Multiple linear regression worked well on predicting Global Sales (dependent variable) with EU Sales and NA Sales (2 independent variables)
+
+R-Squared suggested we can explain over 90% of global sales with those 2 independent variables. Run tests and make some predictions with different EU and NA sales.
+
+Model predicted Global sales with diversion ranging between -1.66% to 17.13%.
+
+To further analyze, I used my multiple linear regression. Model to predict all global sales with the provided data. Realized that model’s prediction performance is poor when sales for either EU or NA is close to 0. Interactive visual helped me to further analyze the situation.
+
+
 
