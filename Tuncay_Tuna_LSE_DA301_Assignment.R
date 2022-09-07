@@ -246,9 +246,34 @@ summary(turtle_sales3)
 
 ###############################################################################
 
-# 2. Determine the normality of the data set.
+# 2. Determine the impact on sales oer product_id
+# Continued to work with df created in Week 4
+# Created visauls using ggplot this time
 
-## 2a) Create Q-Q Plots
+# Recall the df grouped with product_id
+head(turtle_grp_product)
+
+# Create scatter plot
+ggplot(turtle_grp_product, aes(x=Total_EU_Sales, y=Total_NA_Sales)) + geom_point()
+ggplot(turtle_grp_product, aes(x=Total_EU_Sales, y=Total_Global_Sales)) + geom_point()
+ggplot(turtle_grp_product, aes(x=Total_Global_Sales, y=Total_NA_Sales)) + geom_point()
+
+# Create histograms
+ggplot(turtle_grp_product, aes(x=Total_EU_Sales)) + geom_histogram()
+ggplot(turtle_grp_product, aes(x=Total_NA_Sales)) + geom_histogram()
+ggplot(turtle_grp_product, aes(x=Total_Global_Sales)) + geom_histogram()
+# All sales data is right skewed and have outliers. Lets explore further with box plot.
+
+# Create boxplots
+ggplot(turtle_grp_product, aes(x=Total_EU_Sales)) + geom_boxplot()
+ggplot(turtle_grp_product, aes(x=Total_NA_Sales)) + geom_boxplot()
+ggplot(turtle_grp_product, aes(x=Total_Global_Sales)) + geom_boxplot()
+
+###############################################################################
+
+# 3. Determine the normality of the data set.
+
+## 3a) Create Q-Q Plots
 # Create Q-Q Plots.
 
 # NA_Sales
@@ -325,7 +350,6 @@ head(cor_df)
 cor(cor_df)
 
 # Table suggest sales data among themselves are positively correlated. Which is expected.
-# However is this the correct approach? Data is not normally distributed, can I still check correlation between variables?
 ###############################################################################
 
 # 3. Plot the data
@@ -405,40 +429,181 @@ ggplot(turtle_sales3, aes(x=NA_Sales, y=EU_Sales)) +
 
 # 1. Load and explor the data
 # View data frame created in Week 5.
-
+view(turtle_grp_product)
+view(turtle_sales3)
 
 # Determine a summary of the data frame.
-
+summary(turtle_sales3)
+summary(turtle_grp_product)
 
 ###############################################################################
 
 # 2. Create a simple linear regression model
 ## 2a) Determine the correlation between columns
+cor(select(turtle_sales3, -Product, -Platform))
+
+# EU_Sales vs NA_Sales
 # Create a linear regression model on the original data.
-
-
+model_eu_na <- lm(EU_Sales~NA_Sales, data=turtle_sales3)
+summary(model_eu_na)
 
 ## 2b) Create a plot (simple linear regression)
 # Basic visualisation.
+plot(turtle_sales3$NA_Sales, turtle_sales3$EU_Sales)
+abline(coefficients(model_eu_na))
+
+# Calculater the sum of squares error (SSE) to determine strength.
+SSE_eu_na = sum(model_eu_na$residuals^2)
+
+# View the result.
+SSE_eu_na
+# Very  high SSE (723.4159). SSE_eu_na is a poor fit.
+
+# EU_Sales vs Global_Sales
+# Create a linear regression model on the original data.
+model_global_eu <- lm(Global_Sales~EU_Sales, data=turtle_sales3)
+summary(model_global_eu)
+
+## 2b) Create a plot (simple linear regression)
+# Basic visualisation.
+plot(turtle_sales3$EU_Sales, turtle_sales3$Global_Sales)
+abline(coefficients(model_global_eu))
+
+# Calculater the sum of squares error (SSE) to determine strength.
+SSE_global_eu = sum(model_global_eu$residuals^2)
+
+# View the result.
+SSE_global_eu
+# Very  high SSE (3167.155). SSE_global_eu even worse. Poor fit.
+
+# NA_Sales vs Global_Sales
+# Create a linear regression model on the original data.
+model_global_na <- lm(Global_Sales~NA_Sales, data=turtle_sales3)
+summary(model_global_na)
+
+## 2b) Create a plot (simple linear regression)
+# Basic visualisation.
+plot(turtle_sales3$NA_Sales, turtle_sales3$Global_Sales)
+abline(coefficients(model_global_na))
+
+# Calculater the sum of squares error (SSE) to determine strength.
+SSE_global_na = sum(model_global_na$residuals^2)
+
+# View the result.
+SSE_global_na
+# High SSE (1734.163). Better fit than Global_Sales ~ EU_Sales
+# This model (Global vs NA sales) has the highest R-squared. 
 
 
 ###############################################################################
 
 # 3. Create a multiple linear regression model
 # Select only numeric columns from the original data frame.
-
+turtle_sales4 <- select(turtle_sales3, -Product, -Platform)
+view(turtle_sales4)
 
 # Multiple linear regression model.
-
+model_multiple <- lm(Global_Sales ~ EU_Sales + NA_Sales, data=turtle_sales4)
+summary(model_multiple)
+# Very high R-squared value. Suggest model will be a good fit to predict global sales.
 
 ###############################################################################
 
 # 4. Predictions based on given values
+# Create a new df with provided values
+predict_df <- data.frame(NA_Sales=c(34.02,3.93,2.73,2.26,22.08), EU_Sales=c(23.80, 1.56, 0.65, 0.97, 0.52))
+
+# View df to check values
+predict_df
+
+# Predict values for provided sales values 
+predict(model_multiple, newdata = predict_df)
+
+# Add predictions to df
+predict_df$Predict_Global_Sales <- predict(model_multiple, newdata = predict_df)
+
+# View df to check values
+predict_df
+
 # Compare with observed values for a number of records.
 
+# Filter actual global sales value from dataframe
+filter(turtle_sales4, NA_Sales == 34.02, EU_Sales==23.80)
+filter(turtle_sales4, NA_Sales == 3.93, EU_Sales==1.56)
+filter(turtle_sales4, NA_Sales == 2.73, EU_Sales==0.65)
+filter(turtle_sales4, NA_Sales == 2.26, EU_Sales==0.97)
+filter(turtle_sales4, NA_Sales == 22.08, EU_Sales==0.52)
 
+# Put them as a seperate column in predictions df
+predict_df$Actual_Global_Sales <- c((select(filter(turtle_sales4, NA_Sales == 34.02, EU_Sales==23.80), -NA_Sales, -EU_Sales)),
+                                    (select(filter(turtle_sales4, NA_Sales == 3.93, EU_Sales==1.56), -NA_Sales, -EU_Sales)),
+                                    (select(filter(turtle_sales4, NA_Sales == 2.73, EU_Sales==0.65), -NA_Sales, -EU_Sales)),
+                                    (select(filter(turtle_sales4, NA_Sales == 2.26, EU_Sales==0.97), -NA_Sales, -EU_Sales)),
+                                    (select(filter(turtle_sales4, NA_Sales == 22.08, EU_Sales==0.52), -NA_Sales, -EU_Sales)))
+                                    # This creates a list in data frame. Does not allow me to make further calculation
 
-###############################################################################
+# Convert list of Global Actual Sales to Dataframe
+# Install necessary library plyr
+library(plyr)
+df_temp <- ldply(predict_df$Actual_Global_Sales, data.frame)
+
+# View the temproray dataframe
+df_temp
+
+# Put column from temproray df with values to Actual Global Sales
+predict_df$Actual_Global_Sales <-df_temp$X..i..
+
+# View df and check structure again
+predict_df
+str(predict_df)
+
+# Calculating the diversion of Prediction from Actual
+predict_df$Diversion <- round(((predict_df$Predict_Global_Sales/predict_df$Actual_Global_Sales)-1)*100,2)
+
+# View dataframe for evaluation of prediction
+predict_df
+
+# Lets predict all Global Sales with all data in the dataframe to see how successful is the model
+predictall_df <- turtle_sales4
+
+# Predict values for provided sales values 
+predict(model_multiple, newdata = predictall_df)
+
+# Add predictions to df
+predictall_df$Predict_Global_Sales <- predict(model_multiple, newdata = predictall_df)
+
+# Change Global Sales column name into Actual_Global_Sales to avoid confusion
+colnames(predictall_df)[3] <- 'Actual_Global_Sales'
+
+# View df to check values
+head(predictall_df)
+
+# Calculating the diversion of Prediction from Actual
+predictall_df$Diversion <- round(((predictall_df$Predict_Global_Sales/predictall_df$Actual_Global_Sales)-1)*100,2)
+
+# View dataframe for evaluation of prediction
+head(predictall_df)
+
+# Check the range for diversion with summary function
+summary(predictall_df$Diversion)
+
+# Check values for min and max values
+# It seems like high diversion occors where EU / NA sales are close to 0.
+# Max value
+filter(predictall_df, Diversion==2251.6800)
+
+# Min value
+filter(predictall_df, Diversion==-71.1100)
+
+# Create an interactive scatter plot to better understand actual vs prediction with diversion
+# Import necessary libraries
+library(plotly)
+
+# Create the interactive visual
+plot <- ggplot(predictall_df,aes(x=Actual_Global_Sales, y=Predict_Global_Sales, col=Diversion))+geom_point()
+ggplotly(plot)
+
+################################################################################
 
 # 5. Observations and insights
 # Your observations and insights here...
