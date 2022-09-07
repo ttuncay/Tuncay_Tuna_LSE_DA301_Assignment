@@ -341,6 +341,8 @@ kurtosis(turtle_sales3$Global_Sales)
 
 ## 2d) Determine correlation
 # Determine correlation.
+# Data is not normally distributed. This is prerequisite for correlation check.
+# However assumption of normality could be ignored given a large enough data sets because Central Limit Theorem.
 
 # Create new df with only sales data (numeric variables)
 cor_df <-select(turtle_sales3, -Product, -Platform)
