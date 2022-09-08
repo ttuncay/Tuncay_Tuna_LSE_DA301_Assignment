@@ -62,7 +62,6 @@
 # 1. Load and explore the data
 
 # Install and import Tidyverse.
-install.packages('tidyverse')
 library(tidyverse)
 
 # Check the working directory
@@ -120,8 +119,7 @@ qplot(NA_Sales, data=turtle_sales3, geom='boxplot')
 
 # Histogram and boxplot does not give correct understanding due to recurring items. 
 # Example: Products repeat itself in different columns due to sales in different platforms.
-filter(turtle_sales, Product==978)
-turtle_sales %>% count(Product)
+filter(turtle_sales3, Product==3645)
 
 # Therefore better to group df in product, sum sales and create visuals once again.
 
@@ -149,21 +147,6 @@ View(turtle_grp_product)
 summary(turtle_grp_product)
 view(turtle_grp_product)
 
-# Group data based on Platform and determine the sum per Platform
-turtle_grp_platform <- turtle_sales3 %>% group_by(Platform) %>%
-  summarise(count= n(),
-            Total_EU_Sales = sum(EU_Sales),
-            Total_NA_Sales = sum(NA_Sales),
-            Total_Global_Sales = sum(Global_Sales),
-            .groups = 'drop')
-
-# View the data frame.
-View(turtle_grp_platform)
-
-# Explore the data frame.
-summary(turtle_grp_platform)
-view(turtle_grp_platform)
-
 ## 3b) Determine which plot is the best to compare game sales.
 # Create scatterplots.
 qplot(Total_NA_Sales, Total_EU_Sales, data=turtle_grp_product)
@@ -176,17 +159,27 @@ qplot(Total_EU_Sales, data=turtle_grp_product, bins=20)
 qplot(Total_Global_Sales, data=turtle_grp_product, bins=20)
 
 # Create boxplots.
-qplot(Total_EU_Sales, data=turtle_grp_product, geom='boxplot')
-qplot(Total_Global_Sales, data=turtle_grp_product, geom='boxplot')
-qplot(Total_NA_Sales, data=turtle_grp_product, geom='boxplot')
+qplot(Total_NA_Sales, data=turtle_grp_product, geom='boxplot') # Box plot suggests NA sales more than ~10 are outliers.
+qplot(Total_EU_Sales, data=turtle_grp_product, geom='boxplot') # Box plot suggests EU sales more than ~7 are outliers.
+qplot(Total_Global_Sales, data=turtle_grp_product, geom='boxplot') # Box plot suggests Global sales more than ~22 are outliers.
+
+# Filter outliers and check what products they are
+filter(turtle_grp_product, Total_NA_Sales > 10)
+filter(turtle_grp_product, Total_EU_Sales > 7)
+filter(turtle_grp_product, Total_Global_Sales > 22)
+filter(turtle_grp_product, Total_NA_Sales > 10 & Total_Global_Sales > 22 & Total_EU_Sales > 7)
+
 
 ###############################################################################
 
 # 4. Observations and insights
 
-
-
-
+# All sales data are right skewed, they do not show normal distribution.
+# From the scatter plots, it seems like NA sales and Global sales & EU sales and Global sales are positively correlated. 
+# Correlation between EU sales and NA sales is not that obvious.
+# There are outliers in all sales regions. I checked the details in product breakdown.
+# Same products are shown up in outlier section. It is possible that those products are high in price.
+# I will check this with my previous analysis and see they are purchased by which customer group.
 
 ###############################################################################
 ###############################################################################
@@ -246,9 +239,9 @@ summary(turtle_sales3)
 
 ###############################################################################
 
-# 2. Determine the impact on sales oer product_id
+# 2. Determine the impact on sales or product_id
 # Continued to work with df created in Week 4
-# Created visauls using ggplot this time
+# Created visuals using ggplot this time
 
 # Recall the df grouped with product_id
 head(turtle_grp_product)
@@ -277,16 +270,16 @@ ggplot(turtle_grp_product, aes(x=Total_Global_Sales)) + geom_boxplot()
 # Create Q-Q Plots.
 
 # NA_Sales
-qqnorm(turtle_sales3$NA_Sales)
-qqline(turtle_sales3$NA_Sales)
+qqnorm(turtle_grp_product$Total_NA_Sales)
+qqline(turtle_grp_product$Total_NA_Sales)
 
 # EU_Sales
-qqnorm(turtle_sales3$EU_Sales)
-qqline(turtle_sales3$EU_Sales)
+qqnorm(turtle_grp_product$Total_EU_Sales)
+qqline(turtle_grp_product$Total_EU_Sales)
 
 # Global_Sales
-qqnorm(turtle_sales3$Global_Sales)
-qqline(turtle_sales3$Global_Sales)
+qqnorm(turtle_grp_product$Total_Global_Sales)
+qqline(turtle_grp_product$Total_Global_Sales)
 
 ## Q-Q plots suggests data is not normally distributed. 
 ## Let's explore further with Shapiro-Wilk test
@@ -300,44 +293,44 @@ library(moments)
 # Alternate hypothesis: Data is not normally distributed. 
 
 # NA_Sales
-shapiro.test(turtle_sales3$NA_Sales)
+shapiro.test(turtle_grp_product$Total_NA_Sales)
 # p value (p-value < 2.2e-16) way lower than significance level.
 # There is not enough evidence to disprove alternate hypothesis. 
-# Null hypothesis can be rejected.
+# Null hypothesis can be rejected. Data is not normally distributed.
 
 # EU_Sales
-shapiro.test(turtle_sales3$EU_Sales)
-# p value (p-value < 2.2e-16) way lower than significance level.
+shapiro.test(turtle_grp_product$Total_EU_Sales)
+# p value (p-value = 2.987e-16) way lower than significance level.
 # There is not enough evidence to disprove alternate hypothesis. 
-# Null hypothesis can be rejected.
+# Null hypothesis can be rejected. Data is not normally distributed.
 
 # Global_Sales
-shapiro.test(turtle_sales3$Global_Sales)
+shapiro.test(turtle_grp_product$Total_Global_Sales)
 # p value (p-value < 2.2e-16) way lower than significance level.
 # There is not enough evidence to disprove alternate hypothesis. 
-# Null hypothesis can be rejected.
+# Null hypothesis can be rejected. Data is not normally distributed.
 
 
 ## 2c) Determine Skewness and Kurtosis
 # Skewness and Kurtosis.
 
 # NA_Sales
-skewness(turtle_sales3$NA_Sales)
-kurtosis(turtle_sales3$NA_Sales)
-# Skewness value (3.06) greater than 1 indicates a highly skewed distribution
-# Kurtosis value (31.37) greater than 3 indicated leptokurtic (heavy tailed)
+skewness(turtle_grp_product$Total_NA_Sales)
+kurtosis(turtle_grp_product$Total_NA_Sales)
+# Skewness value (3.048198) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (15.6026) greater than 3 indicated leptokurtic (heavy tailed)
 
 # EU_Sales
-skewness(turtle_sales3$EU_Sales)
-kurtosis(turtle_sales3$EU_Sales)
-# Skewness value (4.81) greater than 1 indicates a highly skewed distribution
-# Kurtosis value (44.69) greater than 3 indicated leptokurtic (heavy tailed)
+skewness(turtle_grp_product$Total_EU_Sales)
+kurtosis(turtle_grp_product$Total_EU_Sales)
+# Skewness value (2.886029) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (16.22554) greater than 3 indicated leptokurtic (heavy tailed)
 
 # Global_Sales
-skewness(turtle_sales3$Global_Sales)
-kurtosis(turtle_sales3$Global_Sales)
-# Skewness value (4.04) greater than 1 indicates a highly skewed distribution
-# Kurtosis value (32.64) greater than 3 indicated leptokurtic (heavy tailed)
+skewness(turtle_grp_product$Total_Global_Sales)
+kurtosis(turtle_grp_product$Total_Global_Sales)
+# Skewness value (3.066769) greater than 1 indicates a highly skewed distribution
+# Kurtosis value (17.79072) greater than 3 indicated leptokurtic (heavy tailed)
 
 ## 2d) Determine correlation
 # Determine correlation.
@@ -345,19 +338,22 @@ kurtosis(turtle_sales3$Global_Sales)
 # However assumption of normality could be ignored given a large enough data sets because Central Limit Theorem.
 
 # Create new df with only sales data (numeric variables)
-cor_df <-select(turtle_sales3, -Product, -Platform)
+cor_df <-select(turtle_grp_product, -Product, -count)
 head(cor_df)
 
 # Determine correlation among variable
 cor(cor_df)
 
-# Table suggest sales data among themselves are positively correlated. Which is expected.
+# Table suggest sales data between NA sales and Global sales & EU Sales and Global sales are highly correlated.
+# Correlation between EU sales and NA sales is still positive but not as strong.
+# This is inline which what is identified on scatter plots.
 ###############################################################################
+
 
 # 3. Plot the data
 # Create plots to gain insights into data.
 
-ggplot(turtle_sales3, aes(x=EU_Sales, y=Global_Sales)) +
+ggplot(turtle_grp_product, aes(x=Total_EU_Sales, y=Total_Global_Sales)) +
   geom_point() +
   geom_smooth() +
   labs(title ='Correlation between EU Sales and Global Sales',
@@ -366,7 +362,7 @@ ggplot(turtle_sales3, aes(x=EU_Sales, y=Global_Sales)) +
        y = 'Global Sales') +
   theme_minimal()
 
-ggplot(turtle_sales3, aes(x=NA_Sales, y=Global_Sales)) +
+ggplot(turtle_grp_product, aes(x=Total_NA_Sales, y=Total_Global_Sales)) +
   geom_point() +
   geom_smooth() +
   labs(title ='Correlation between North America Sales and Global Sales',
@@ -375,7 +371,7 @@ ggplot(turtle_sales3, aes(x=NA_Sales, y=Global_Sales)) +
        y = 'Global Sales') +
   theme_minimal()
 
-ggplot(turtle_sales3, aes(x=NA_Sales, y=EU_Sales)) +
+ggplot(turtle_grp_product, aes(x=Total_NA_Sales, y=Total_EU_Sales)) +
   geom_point() +
   geom_smooth() +
   labs(title ='Correlation between North America Sales and EU Sales',
@@ -386,9 +382,48 @@ ggplot(turtle_sales3, aes(x=NA_Sales, y=EU_Sales)) +
  
 ###############################################################################
 
-# 4. Observations and insights
-# Your observations and insights here...
 
+# 4. Plot the data (ieth customer segments)
+# Lets bring df created in python that enables me to group products in terms of customer groups.
+
+# Import the data set.
+customer_segments <- read.csv('review_df_final.csv', header=T)
+
+# Print the data frame.
+customer_segments
+view(customer_segments)
+
+# Merge this df with product sales df to bring customer segments in.
+turtle_product_segment <- merge(x=turtle_grp_product, y=customer_segments, by='Product')
+
+# View the data frame.
+head(turtle_product_segment)
+
+# Replot scatter plot with 3rd variable customer segments
+ggplot(turtle_product_segment, aes(x=Total_NA_Sales, y=Total_Global_Sales, col=Customer_Segments)) +
+  geom_point(alpha=1) +
+  labs(title ='Correlation between North America Sales and Global Sales',
+       subtitle = 'Scatter Plot for North America Sales vs Global Sales in Customer Segment Detail',
+       x = 'North America Sales',
+       y = 'Global Sales') +
+  theme_minimal()
+
+ggplot(turtle_product_segment, aes(x=Total_EU_Sales, y=Total_Global_Sales, col=Customer_Segments)) +
+  geom_point(alpha=1) +
+  labs(title ='Correlation between EU Sales and Global Sales',
+       subtitle = 'Scatter Plot for EU Sales vs Global Sales in Customer Segment Detail',
+       x = 'EU Sales',
+       y = 'Global Sales') +
+  theme_minimal()
+
+###############################################################################
+
+# 4. Observations and insights
+# Data is not normally distributed. That was something already identified in week 4.This is prerequisite for correlation check.
+# However assumption of normality could be ignored given a large enough data sets because Central Limit Theorem.
+# Correlation between EU sales and Global Sales & NA sales and Global Sales is highly positively correlated.
+# Finally I combined the dataframe I created withg python includes customer clusters with products.
+# Then recreated the scatter plots to see correlation between sales in customer segments detail.
 
 ###############################################################################
 ###############################################################################
@@ -429,7 +464,7 @@ ggplot(turtle_sales3, aes(x=NA_Sales, y=EU_Sales)) +
 
 ###############################################################################
 
-# 1. Load and explor the data
+# 1. Load and explore the data
 # View data frame created in Week 5.
 view(turtle_grp_product)
 view(turtle_sales3)
@@ -449,12 +484,16 @@ cor(select(turtle_sales3, -Product, -Platform))
 model_eu_na <- lm(EU_Sales~NA_Sales, data=turtle_sales3)
 summary(model_eu_na)
 
+# Checking linear relationship
+plot(model_eu_na,1) 
+# Ideally we want horizontal line around 0. Our is not due to outliers.
+
 ## 2b) Create a plot (simple linear regression)
 # Basic visualisation.
 plot(turtle_sales3$NA_Sales, turtle_sales3$EU_Sales)
 abline(coefficients(model_eu_na))
 
-# Calculater the sum of squares error (SSE) to determine strength.
+# Calculate the sum of squares error (SSE) to determine strength.
 SSE_eu_na = sum(model_eu_na$residuals^2)
 
 # View the result.
@@ -466,12 +505,16 @@ SSE_eu_na
 model_global_eu <- lm(Global_Sales~EU_Sales, data=turtle_sales3)
 summary(model_global_eu)
 
+# Checking linear relationship
+plot(model_global_eu,1) 
+# Ideally we want horizontal line around 0. Our is not.
+
 ## 2b) Create a plot (simple linear regression)
 # Basic visualisation.
 plot(turtle_sales3$EU_Sales, turtle_sales3$Global_Sales)
 abline(coefficients(model_global_eu))
 
-# Calculater the sum of squares error (SSE) to determine strength.
+# Calculate the sum of squares error (SSE) to determine strength.
 SSE_global_eu = sum(model_global_eu$residuals^2)
 
 # View the result.
@@ -483,12 +526,17 @@ SSE_global_eu
 model_global_na <- lm(Global_Sales~NA_Sales, data=turtle_sales3)
 summary(model_global_na)
 
+# Checking linear relationship
+plot(model_global_na,1) 
+# Ideally we want horizontal line around 0. Our is not.
+# It is the worst of all.
+
 ## 2b) Create a plot (simple linear regression)
 # Basic visualisation.
 plot(turtle_sales3$NA_Sales, turtle_sales3$Global_Sales)
 abline(coefficients(model_global_na))
 
-# Calculater the sum of squares error (SSE) to determine strength.
+# Calculate the sum of squares error (SSE) to determine strength.
 SSE_global_na = sum(model_global_na$residuals^2)
 
 # View the result.
@@ -508,6 +556,18 @@ view(turtle_sales4)
 model_multiple <- lm(Global_Sales ~ EU_Sales + NA_Sales, data=turtle_sales4)
 summary(model_multiple)
 # Very high R-squared value. Suggest model will be a good fit to predict global sales.
+
+# Checking linear relationship
+plot(model_multiple,1) 
+# Ideally we want horizontal line around 0. Our is not.
+
+# Calculater the sum of squares error (SSE) to determine strength.
+SSE_multiple = sum(model_multiple$residuals^2)
+
+# View the result.
+SSE_multiple
+# High SSE (431.3706). Better fit than simple linear regression models.
+# Closer to 0 is best fit for model.
 
 ###############################################################################
 
@@ -559,8 +619,17 @@ predict_df$Actual_Global_Sales <-df_temp$X..i..
 predict_df
 str(predict_df)
 
+# Import library forecast to use accuracy function
+library(forecast)
+
+# Check for Accuracy of the model
+accuracy(predict_df$Predict_Global_Sales,predict_df$Actual_Global_Sales)
+# MAPE is 10.30286. This is a very good value.
+# As rule of thumb MAPE <10% is excellent, <20% is good. 
+# This is close to excellent.
+
 # Calculating the diversion of Prediction from Actual
-predict_df$Diversion <- round(((predict_df$Predict_Global_Sales/predict_df$Actual_Global_Sales)-1)*100,2)
+predict_df$Diversion <- round((predict_df$Predict_Global_Sales-predict_df$Actual_Global_Sales),2)
 
 # View dataframe for evaluation of prediction
 predict_df
@@ -580,8 +649,15 @@ colnames(predictall_df)[3] <- 'Actual_Global_Sales'
 # View df to check values
 head(predictall_df)
 
+# Check for Accuracy of the model
+accuracy(predictall_df$Predict_Global_Sales,predictall_df$Actual_Global_Sales)
+# MAPE is 46.33867.
+# As rule of thumb MAPE <10% is excellent, <20% is good. 
+# Once we feed all values to model, the prediction accuracy dropped significantly. 
+# The reason behind may be my data is not linear. I may need to convert my data to linear.
+
 # Calculating the diversion of Prediction from Actual
-predictall_df$Diversion <- round(((predictall_df$Predict_Global_Sales/predictall_df$Actual_Global_Sales)-1)*100,2)
+predictall_df$Diversion <- round((predictall_df$Predict_Global_Sales-predictall_df$Actual_Global_Sales),2)
 
 # View dataframe for evaluation of prediction
 head(predictall_df)
@@ -592,10 +668,10 @@ summary(predictall_df$Diversion)
 # Check values for min and max values
 # It seems like high diversion occors where EU / NA sales are close to 0.
 # Max value
-filter(predictall_df, Diversion==2251.6800)
+filter(predictall_df, Diversion==3.620000)
 
 # Min value
-filter(predictall_df, Diversion==-71.1100)
+filter(predictall_df, Diversion==-7.460000)
 
 # Create an interactive scatter plot to better understand actual vs prediction with diversion
 # Import necessary libraries
@@ -608,8 +684,10 @@ ggplotly(plot)
 ################################################################################
 
 # 5. Observations and insights
-# Your observations and insights here...
-
+# High R squared in multiple linear regression model suggests a good fit.
+# Checking multiple values suggested around 10% MAPE value which is close to excellent.
+# However once I predicted values for all eu and na sales, MAPE increases to 40.
+# Data may need further work as to convert it to linear.
 
 ###############################################################################
 ###############################################################################
